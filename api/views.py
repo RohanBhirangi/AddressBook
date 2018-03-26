@@ -16,6 +16,7 @@ def contact(request):
     elif request.method == "POST":
         data = {}
 
+        # Check if all the required fields are specified
         if request.POST.get("name") and request.POST.get("number") and request.POST.get("address") and request.POST.get(
                 "email"):
             data["name"] = request.POST.get("name")
@@ -25,9 +26,11 @@ def contact(request):
             response = elasticsearch_handler.insert_contact(data)
             return HttpResponse(json.dumps(response), content_type="application/json")
 
+        # Show error message if all the fields are not specified
         return HttpResponse(json.dumps({"acknowledged": False, "message": "Required fields not specified."}),
                             content_type="application/json")
 
+    # Show error message if request is not GET or POST
     return HttpResponse(json.dumps({"acknowledged": False, "message": "Invalid request."}),
                         content_type="application/json")
 
@@ -41,6 +44,7 @@ def contact_name(request, name):
         parameters = QueryDict(request.body)
         data = {}
 
+        # Check if all the required fields are specified
         if parameters["name"] and parameters["number"] and parameters["address"] and parameters["email"]:
             data["name"] = parameters["name"]
             data["number"] = parameters["number"]
@@ -49,6 +53,7 @@ def contact_name(request, name):
             response = elasticsearch_handler.update_contact(name, data)
             return HttpResponse(json.dumps(response), content_type="application/json")
 
+        # Show error message if all the fields are not specified
         return HttpResponse(json.dumps({"acknowledged": False, "message": "Required fields not specified."}),
                             content_type="application/json")
 
@@ -56,5 +61,6 @@ def contact_name(request, name):
         response = elasticsearch_handler.delete_contact(name)
         return HttpResponse(json.dumps(response), content_type="application/json")
 
+    # Show error message if request is not GET, PUT or DELETE
     return HttpResponse(json.dumps({"acknowledged": False, "message": "Invalid request."}),
                         content_type="application/json")

@@ -8,23 +8,29 @@ sys.path.append(os.getcwd())
 import config
 from datastore import elasticsearch_handler
 
+# Retrieve host and port from config file
 host = config.elasticsearch_host
 port = config.elasticsearch_port
+
+# Connect to elasticsearch on the specified host and port
 es = Elasticsearch(host + ":" + port + "/")
 
 
 class TestInsertContact(unittest.TestCase):
 
+    # Create the index 'addressbook' before each test
     @classmethod
     def setUp(cls):
         global es
         es.indices.create(index='addressbook', ignore=400)
 
+    # Delete the index 'addressbook' after each test
     @classmethod
     def tearDown(cls):
         global es
         es.indices.delete(index="addressbook", ignore=[400, 404])
 
+    # Check if a new contact is stored in the data store
     def test_insert_pass(self):
         data = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                 "email": "johndoe@gmail.com"}
@@ -37,6 +43,7 @@ class TestInsertContact(unittest.TestCase):
         self.assertEqual(data["address"], inserted_data["address"])
         self.assertEqual(data["email"], inserted_data["email"])
 
+    # Check if a contact with an existing name can be stored
     def test_insert_contact_exists(self):
         data = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                 "email": "johndoe@gmail.com"}
@@ -47,18 +54,21 @@ class TestInsertContact(unittest.TestCase):
         response = elasticsearch_handler.insert_contact(new_data)
         self.assertFalse(response["acknowledged"])
 
+    # Check if a contact with an invalid name can be stored
     def test_insert_invalid_name(self):
         data = {"name": "JohnDaveMikePaulKurtS", "number": "1234567890", "address": "Maple Road, Orange, AB",
                 "email": "johndoe@gmail.com"}
         response = elasticsearch_handler.insert_contact(data)
         self.assertFalse(response["acknowledged"])
 
+    # Check if a contact with an invalid number can be stored
     def test_insert_invalid_number(self):
         data = {"name": "John", "number": "1234567890123456", "address": "Maple Road, Orange, AB",
                 "email": "johndoe@gmail.com"}
         response = elasticsearch_handler.insert_contact(data)
         self.assertFalse(response["acknowledged"])
 
+    # Check if a contact with an invalid address can be stored
     def test_insert_invalid_address(self):
         data = {"name": "John", "number": "1234567890",
                 "address": "Maple Road, Orange, AB, Maple Road, Orange, AB, Maple Road, Orange, AB, Maple Road, Orange,"
@@ -66,6 +76,7 @@ class TestInsertContact(unittest.TestCase):
         response = elasticsearch_handler.insert_contact(data)
         self.assertFalse(response["acknowledged"])
 
+    # Check if a contact with an invalid email can be stored
     def test_insert_invalid_email(self):
         data = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                 "email": "johndoe#gmail,com"}
@@ -75,16 +86,19 @@ class TestInsertContact(unittest.TestCase):
 
 class TestGetContact(unittest.TestCase):
 
+    # Create the index 'addressbook' before each test
     @classmethod
     def setUp(cls):
         global es
         es.indices.create(index='addressbook', ignore=400)
 
+    # Delete the index 'addressbook' after each test
     @classmethod
     def tearDown(cls):
         global es
         es.indices.delete(index="addressbook", ignore=[400, 404])
 
+    # Check if a contact can be retrieved from the data store
     def test_get_pass(self):
         data = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                 "email": "johndoe@gmail.com"}
@@ -97,6 +111,7 @@ class TestGetContact(unittest.TestCase):
         self.assertEqual(data["address"], get_data["address"])
         self.assertEqual(data["email"], get_data["email"])
 
+    # Check if a contact not present can be retrieved
     def test_get_fail(self):
         test_name = "Paul"
         results = elasticsearch_handler.get_contact(test_name)
@@ -105,16 +120,19 @@ class TestGetContact(unittest.TestCase):
 
 class TestUpdateContact(unittest.TestCase):
 
+    # Create the index 'addressbook' before each test
     @classmethod
     def setUp(cls):
         global es
         es.indices.create(index='addressbook', ignore=400)
 
+    # Delete the index 'addressbook' after each test
     @classmethod
     def tearDown(cls):
         global es
         es.indices.delete(index="addressbook", ignore=[400, 404])
 
+    # Check if an existing contact can be updated in the data store
     def test_update_pass(self):
         data = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                 "email": "johndoe@gmail.com"}
@@ -132,6 +150,7 @@ class TestUpdateContact(unittest.TestCase):
         self.assertEqual(new_data["address"], updated_data["address"])
         self.assertEqual(new_data["email"], updated_data["email"])
 
+    # Check if a contact can be updated with a different existing contact name
     def test_update_contact_exists(self):
         data1 = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                  "email": "johndoe@gmail.com"}
@@ -145,6 +164,7 @@ class TestUpdateContact(unittest.TestCase):
         response = elasticsearch_handler.update_contact("John", new_data)
         self.assertFalse(response["acknowledged"])
 
+    # Check if a contact with an invalid name can be updated
     def test_update_invalid_name(self):
         data = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                 "email": "johndoe@gmail.com"}
@@ -155,6 +175,7 @@ class TestUpdateContact(unittest.TestCase):
         response = elasticsearch_handler.update_contact("John", new_data)
         self.assertFalse(response["acknowledged"])
 
+    # Check if a contact with an invalid number can be updated
     def test_update_invalid_number(self):
         data = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                 "email": "johndoe@gmail.com"}
@@ -165,6 +186,7 @@ class TestUpdateContact(unittest.TestCase):
         response = elasticsearch_handler.update_contact("John", new_data)
         self.assertFalse(response["acknowledged"])
 
+    # Check if a contact with an invalid address can be updated
     def test_update_invalid_address(self):
         data = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                 "email": "johndoe@gmail.com"}
@@ -177,6 +199,7 @@ class TestUpdateContact(unittest.TestCase):
         response = elasticsearch_handler.update_contact("John", new_data)
         self.assertFalse(response["acknowledged"])
 
+    # Check if a contact with an invalid email can be updated
     def test_update_invalid_email(self):
         data = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                 "email": "johndoe@gmail.com"}
@@ -190,16 +213,19 @@ class TestUpdateContact(unittest.TestCase):
 
 class TestDeleteContact(unittest.TestCase):
 
+    # Create the index 'addressbook' before each test
     @classmethod
     def setUp(cls):
         global es
         es.indices.create(index='addressbook', ignore=400)
 
+    # Delete the index 'addressbook' after each test
     @classmethod
     def tearDown(cls):
         global es
         es.indices.delete(index="addressbook", ignore=[400, 404])
 
+    # Check if a contact can be deleted from the data store
     def test_delete_pass(self):
         data = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                 "email": "johndoe@gmail.com"}
@@ -210,6 +236,7 @@ class TestDeleteContact(unittest.TestCase):
         results = es.search(index="addressbook", doc_type="contact", body={"query": {"match": {"name": data["name"]}}})
         self.assertEqual(0, len(results["hits"]["hits"]))
 
+    # Check if a contact not present can be deleted
     def test_delete_fail(self):
         test_name = "Paul"
         response = elasticsearch_handler.delete_contact(test_name)
@@ -218,16 +245,19 @@ class TestDeleteContact(unittest.TestCase):
 
 class TestGetContacts(unittest.TestCase):
 
+    # Create the index 'addressbook' before each test
     @classmethod
     def setUp(cls):
         global es
         es.indices.create(index='addressbook', ignore=400)
 
+    # Delete the index 'addressbook' after each test
     @classmethod
     def tearDown(cls):
         global es
         es.indices.delete(index="addressbook", ignore=[400, 404])
 
+    # Check if all the contacts can be retrieved from the data store
     def test_get_contacts_pass(self):
         data1 = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                  "email": "johndoe@gmail.com"}
@@ -255,10 +285,12 @@ class TestGetContacts(unittest.TestCase):
                 count += 1
         self.assertEqual(2, count)
 
+    # Check if contacts can be retrieved from an empty data store
     def test_get_contacts_fail(self):
         results = elasticsearch_handler.get_contacts(None, None, None)
         self.assertEqual(0, len(results))
 
+    # Check if pageSize can be used to limit the number of results retrieved
     def test_page_size(self):
         data1 = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                  "email": "johndoe@gmail.com"}
@@ -273,6 +305,7 @@ class TestGetContacts(unittest.TestCase):
         results = elasticsearch_handler.get_contacts(2, None, None)
         self.assertEqual(2, len(results))
 
+    # Check if page can be used to offset the results from the first result
     def test_page(self):
         data1 = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                  "email": "johndoe@gmail.com"}
@@ -287,6 +320,7 @@ class TestGetContacts(unittest.TestCase):
         results = elasticsearch_handler.get_contacts(None, 2, None)
         self.assertEqual(1, len(results))
 
+    # Check if contacts can be retrieved based on a query
     def test_query(self):
         data1 = {"name": "John", "number": "1234567890", "address": "Maple Road, Orange, AB",
                  "email": "johndoe@gmail.com"}

@@ -59,6 +59,23 @@ elasticsearch_port = "9200"
 ```
 python test/test_elasticsearch.py -v
 ```
+Running the unit tests will delete the elasticsearch index and any data that might have been populated.
+
+## Code Structure
+* root
+	* addressbook: The main project folder
+		* settings.py: Specifies various settings related to the project
+		* urls.py: Defines endpoints URL mapping scheme for 'addressbook'
+	* api: 'api' application of the main 'addressbook' project
+		* urls.py: Defines URL mapping scheme for 'api'
+		* views.py: Handles http requests made over the endpoints
+	* datastore: Contains data store handlers
+		* elasticsearch_handler.py: Contains elasticsearch storage/retrieval logic
+		* validity_handler.py: Contains input field validity checking logic
+	* test: Contains unit tests for the data store handlers
+		* test_elasticsearch.py: Contains unit tests for elasticsearch logic
+	* venv: The virtual environment of the project
+	* config.py: Contains configurable properties such as elasticsearch host and port
 
 ###### Assumptions
 * Contact name should be a single word i.e., it should not contain any spaces. This is because we are specifying the name in some of our API endpoints. If names with spaces are allowed, like 'John Doe' and 'John Walker', then the /contact/John endpoint would not be able to distinguish which contact to access. This is why the contact names are unique and do not contain spaces.
