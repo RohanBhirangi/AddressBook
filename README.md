@@ -80,7 +80,7 @@ Running the unit tests will delete the elasticsearch index and any data that mig
 ###### Assumptions
 * Contact name should be a single word i.e., it should not contain any spaces. This is because we are specifying the name in some of our API endpoints. If names with spaces are allowed, like 'John Doe' and 'John Walker', then the /contact/John endpoint would not be able to distinguish which contact to access. This is why the contact names are unique and do not contain spaces.
 * The fields for the POST and PUT queries are passed through POST data (or body) and not through query parameters.
-* All fields required for the POST AND PUT endpoints even if they are the same as the existing contact.
+* All fields required for the POST and PUT endpoints even if they are the same as the existing contact.
 
 ###### Technical Specifications
 * Django==2.0.3
